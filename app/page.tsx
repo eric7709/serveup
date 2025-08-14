@@ -16,9 +16,10 @@ export default function HomePage() {
   // Show loading during hydration
   if (!mounted || loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-blue-900">
+      <div className="flex justify-center items-center h-screen bg-amber-700">
         <p className="text-white text-xl">Loading...</p>
       </div>
+      
     );
   }
 
