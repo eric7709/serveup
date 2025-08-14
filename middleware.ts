@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function middleware(req: NextRequest) {
   let response = NextResponse.next({
@@ -9,6 +9,7 @@ export async function middleware(req: NextRequest) {
     },
   })
 
+  // Create Supabase client directly in middleware (don't use supabaseServer())
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,7 +18,7 @@ export async function middleware(req: NextRequest) {
         get(name: string) {
           return req.cookies.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           req.cookies.set({
             name,
             value,
@@ -34,7 +35,7 @@ export async function middleware(req: NextRequest) {
             ...options,
           })
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           req.cookies.set({
             name,
             value: '',
@@ -77,7 +78,7 @@ export async function middleware(req: NextRequest) {
 
     const role = employee.role;
 
-    // Route protection logic (your existing code is fine)
+    // Your existing role checking logic
     if (req.nextUrl.pathname.startsWith("/cashier")) {
       if (!["cashier", "admin"].includes(role)) {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
@@ -95,7 +96,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
     }
-
+    
     if (req.nextUrl.pathname.startsWith("/kitchen")) {
       if (!["chef", "cook", "admin"].includes(role)) {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
@@ -103,6 +104,7 @@ export async function middleware(req: NextRequest) {
     }
 
     return response;
+
   } catch (error) {
     console.error('Middleware error:', error);
     return NextResponse.redirect(new URL("/auth/login", req.url));
@@ -110,5 +112,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // matcher: ["/kitchen/:path*", "/admin/:path*", "/waiter/:path*", "/cashier/:path*"],
+  matcher: ["/kitchen/:path*", "/admin/:path*", "/waiter/:path*", "/cashier/:path*"],
 };
